@@ -4,7 +4,7 @@
 
 import { registerVideoSupport } from '../src/adServerManager';
 import { getWinningBids } from '../src/targeting';
-import { formatQS, format as buildUrl } from '../src/url';
+import { formatQS, format as buildUrl, parse } from '../src/url';
 import { parseSizesInput } from '../src/utils';
 
 /**
@@ -58,6 +58,10 @@ export default function buildDfpVideoUrl(options) {
   const adUnit = options.adUnit;
   const bid = options.bid || getWinningBids(adUnit.code)[0];
 
+  if (options.url) {
+    return buildVideoUrlFromUrl(options.url, bid);
+  }
+
   const derivedParams = {
     correlator: Date.now(),
     sz: parseSizesInput(adUnit.sizes).join('|'),
@@ -81,6 +85,20 @@ export default function buildDfpVideoUrl(options) {
     pathname: '/gampad/ads',
     search: queryParams
   });
+}
+
+function buildVideoUrlFromUrl(url, bid) {
+  const components = parse(url);
+
+  components.search.description_url = encodeURIComponent(bid.descriptionUrl);
+
+  const customParams = Object.assign({},
+    bid.adserverTargeting,
+    { hb_uuid: bid.videoCacheKey },
+  );
+  components.search.cust_params = encodeURIComponent(formatQS(customParams));
+
+  return buildUrl(components);
 }
 
 registerVideoSupport('dfp', {
