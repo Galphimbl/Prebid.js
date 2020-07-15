@@ -19,10 +19,10 @@ const url = 'URL_TO_SERVER_ENDPOINT';
   }
  */
 let admixerAnalytics = Object.assign(adapter({url, analyticsType}), {
-  // track({eventType, args}) {
-  //   logInfo('[TRACK]', eventType, args, admixerAnalytics.context);
-  //   return {eventType, args};
-  // }
+  track({eventType, args}) {
+    logInfo('[TRACK]', eventType, args, admixerAnalytics.context);
+    return {eventType, args};
+  }
 });
 
 // save the base class function
