@@ -5,7 +5,7 @@ import adaptermanager from '../src/adapterManager.js';
 import {logInfo} from '../src/utils.js';
 
 const analyticsType = 'endpoint';
-const url = 'URL_TO_SERVER_ENDPOINT';
+const url = 'https://inv-nets.admixer.net/hb_analytics.aspx';
 /**
  * {
     track: _track,
@@ -19,10 +19,10 @@ const url = 'URL_TO_SERVER_ENDPOINT';
   }
  */
 let admixerAnalytics = Object.assign(adapter({url, analyticsType}), {
-  track({eventType, args}) {
-    logInfo('[TRACK]', eventType, args, admixerAnalytics.context);
-    return {eventType, args};
-  }
+  // track({eventType, args}) {
+  //   logInfo('[TRACK]', eventType, args, admixerAnalytics.context);
+  //   return {eventType, args};
+  // }
 });
 
 // save the base class function
