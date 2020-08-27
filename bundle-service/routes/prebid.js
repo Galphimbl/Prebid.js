@@ -3,7 +3,7 @@ const nodeBundle = require(`${ROOT_FOLDER}/gulpfile`);
 const {biddersMap} = require("../bidders");
 
 function prebidJSRoute(req, res) {
-  const {ba: bidAdapters = '', aa: analyticsAdapters = ''} = req.query
+  const {ba: bidAdapters = '', aa: analyticsAdapters = '', pm: prebidModules = ''} = req.query
   const bidAdaptersList = bidAdapters
     .split(',')
     .filter(a => a.trim() !== '')
@@ -12,8 +12,11 @@ function prebidJSRoute(req, res) {
     .split(',')
     .filter(a => a.trim() !== '')
     .map((name) => `${name}AnalyticsAdapter`);
-  const modules = bidAdaptersList.concat(analyticsAdaptersList);
-  nodeBundle(Array.from(new Set(modules))).then(function (file) {
+  const prebidModulesList = prebidModules
+    .split(',')
+    .filter(a => a.trim() !== '')
+  const allModules = bidAdaptersList.concat(analyticsAdaptersList).concat(prebidModulesList);
+  nodeBundle(Array.from(new Set(allModules))).then(function (file) {
     res.type('application/javascript');
     res.end(file.toString());
   })
