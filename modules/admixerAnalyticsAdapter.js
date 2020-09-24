@@ -3,6 +3,11 @@ import adapter from '../src/AnalyticsAdapter.js';
 // import CONSTANTS from 'src/constants.json';
 import adaptermanager from '../src/adapterManager.js';
 import {logInfo} from '../src/utils.js';
+import {getHook} from "../src/hook";
+import {requestBidsHook} from "./userId";
+import {getGlobal} from "../src/prebidGlobal";
+import {auctionManager} from "../src/auctionManager";
+import {createTrackPixelHtml, logError} from "../src/utils";
 
 const analyticsType = 'endpoint';
 const url = 'https://inv-nets.admixer.net/hb_analytics.aspx';
@@ -32,6 +37,35 @@ admixerAnalytics.originEnableAnalytics = admixerAnalytics.enableAnalytics;
 admixerAnalytics.enableAnalytics = function (config) {
   // initOptions = config.options;
   admixerAnalytics.originEnableAnalytics(config); // call the base class function
+
+  // HOOKS
+// addBidResponse
+// bidsBackCallback
+// registerAdserver
+// validateGdprEnforcement
+// checkAdUnitSetup
+// getBids
+//   getGlobal().requestBids.before(function (fn, a, b, c) {
+//     fn.call(this)
+//   });
+  getHook('addBidResponse').before(function(fn, adUnitCode, bid) {
+    if (!bid) {
+      return fn.call(this, adUnitCode);
+    }
+    // let bidder = bid.bidderCode || bid.bidder;
+    // let requestId = bid.requestId;
+    let bidRequest = findRequestForBid(bid);
+    bid.ad = `${createTrackPixelFromObject({
+      eventType: 'bidView',
+      args: {
+        ...bidRequest,
+        cpm: bid.originalCpm,
+        currency: bid.originalCurrency
+      },
+    })}${bid.ad}`;
+    logInfo('[BID_REQUEST]', bidRequest, bid);
+    fn.call(this, adUnitCode, bid);
+  }, 100);
 };
 
 adaptermanager.registerAnalyticsAdapter({
@@ -39,3 +73,21 @@ adaptermanager.registerAnalyticsAdapter({
   code: 'admixer'
 });
 export default admixerAnalytics;
+
+function findRequestForBid(bid) {
+  let bidder = bid.bidderCode || bid.bidder;
+  let requestId = bid.requestId;
+  const requestedBid = auctionManager
+    .getBidsRequested()
+    .reduce((a, b) => a.concat(b.bids), [])
+    .find((_bid) => _bid.bidder === bidder && _bid.bidId === requestId)
+  ;
+  if (!requestedBid) {
+    logError(`Could not find requestedBid for bidder "${bidder}" with requestId "${requestId}"`);
+  }
+  return requestedBid;
+}
+
+function createTrackPixelFromObject(obj) {
+  return createTrackPixelHtml(`${url}?${JSON.stringify(obj)}`)
+}

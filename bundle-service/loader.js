@@ -6,6 +6,7 @@
   var PREBID_TIMEOUT = siteConfig.prebid_timeout || serverConfig.prebid_timeout;
   var PREBID_MODULES = siteConfig.prebid_modules || serverConfig.prebid_modules || [];
   var PREBID_CONFIG = siteConfig.prebid_config || serverConfig.prebid_config || {};
+  var AUCTION_ID = siteConfig.autcion_id || null
   var adapters = Object.keys(
     AD_UNITS.reduce(function(obj, adUnit) {
       adUnit.bids.forEach(function(bid){
@@ -14,7 +15,7 @@
       return obj;
     }, {})
   ).sort();
-  var modules = PREBID_MODULES.sort();
+  var modules = PREBID_MODULES.sort().concat(['express']);
   var analytics = ['admixer'].sort();
   var pbjs = window.pbjs = window.pbjs || {};
   pbjs.que = pbjs.que || [];
@@ -28,11 +29,20 @@
       options: {options: true}
     });
     pbjs.setConfig(Object.assign({}, PREBID_CONFIG));
-    pbjs.requestBids({
-      bidsBackHandler: sendAdserverRequest,
-      timeout: PREBID_TIMEOUT,
-      adUnits: AD_UNITS,
-    });
+    if (AUCTION_ID) {
+      pbjs.requestBids({
+        bidsBackHandler: sendAdserverRequest,
+        timeout: PREBID_TIMEOUT,
+        adUnits: AD_UNITS,
+        auctionId: AUCTION_ID,
+      });
+    } else {
+      pbjs.requestBids({
+        bidsBackHandler: sendAdserverRequest,
+        timeout: PREBID_TIMEOUT,
+        adUnits: AD_UNITS,
+      });
+    }
   });
 
   function sendAdserverRequest() {
