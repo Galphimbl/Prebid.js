@@ -2,7 +2,8 @@ import * as utils from '../src/utils.js';
 import {loadExternalScript} from "../src/adloader";
 
 export const MODULE_NAME = 'adServerDFP';
-const DFP_SRC_NO_PROTOCOL = 'www.googletagservices.com/tag/js/gpt.js';
+const DFP_SCRIPT_NAME = "gpt.js";
+const DFP_SRC_NO_PROTOCOL = `www.googletagservices.com/tag/js/${DFP_SCRIPT_NAME}`;
 const DFP_SRC = `https://${DFP_SRC_NO_PROTOCOL}`;
 
 const logInfo = utils.logInfo.bind(utils, `[${MODULE_NAME}]`);
@@ -18,26 +19,29 @@ $$PREBID_GLOBAL$$.initAdServer = function ({adUnits, timeout, auctionId}) {
     loadDFPScript();
   }
   const dfpSlotsMap = {};
+  const requestedSlots = [];
   let oGptDefineSlot;
+  let oGptDisplay;
   window.googletag = window.googletag || {};
   window.googletag.cmd = window.googletag.cmd || [];
   window.googletag.cmd.push(function () {
     const gpt = window.googletag;
     const pads = gpt.pubads;
     oGptDefineSlot = gpt.defineSlot;
+    oGptDisplay = gpt.display;
     if (!gpt.display || !gpt.enableServices || typeof pads !== 'function' || !pads().refresh || !pads().disableInitialLoad || !pads().getSlots || !pads().enableSingleRequest) {
       utils.logError('could not bind to gpt googletag api');
       return;
     }
-    // if (!isInitialLoadDisabled()) {
-    //   logInfo('disable initial load');
-    //   pads().disableInitialLoad();
-    // }
+    pads().addEventListener('slotRequested', function(event) {
+      var slot = event.slot;
+      requestedSlots.push(slot.getSlotElementId());
+    });
     logInfo('enable single request');
     pads().enableSingleRequest();
     logInfo('enable services');
     gpt.enableServices();
-    gpt.defineSlot = function(adUnitPath, sizes, opt_div) {
+    const _defineSlot = function(adUnitPath, sizes, opt_div) {
       if (dfpSlotsMap[opt_div]) {
         logWarn(`prevent rewrite slot for "${opt_div}"`);
         return {
@@ -45,6 +49,25 @@ $$PREBID_GLOBAL$$.initAdServer = function ({adUnits, timeout, auctionId}) {
         }
       }
       return oGptDefineSlot(adUnitPath, sizes, opt_div);
+    };
+    const _display = function(opt_div) {
+      requestSlot(opt_div);
+      return oGptDisplay(opt_div);
+    };
+    Object.defineProperty(gpt, 'defineSlot', {
+      get: function() {return _defineSlot; },
+      set: function() {},
+    });
+    Object.defineProperty(gpt, 'display', {
+      get: function(){ return _display; },
+      set: function() {}
+    });
+
+    function requestSlot(opt_div) {
+      const dfpSlot = getDFPSlot(opt_div);
+      if (dfpSlot && requestedSlots.indexOf(opt_div) === -1) {
+        pads().refresh([dfpSlot]);
+      }
     }
   });
   adUnits.filter((adUnit) => {
@@ -65,17 +88,6 @@ $$PREBID_GLOBAL$$.initAdServer = function ({adUnits, timeout, auctionId}) {
     const adUnitPath = `/${networkCode}/${unitCode}`;
 
     dfpSlotsMap[phId] = {adUnitPath: adUnitPath, sizes: sizes, phId: phId};
-    // window.googletag.cmd.push(function() {
-    //   const dfpSlot = getDFPSlot(phId);
-    //   if (dfpSlot) {
-    //     return logWarn(`disable prebid for "${phId}", slot already defined on page`);
-    //     // window.googletag.destroySlots([dfpSlot]);
-    //   }
-    //   logInfo('define slot', `('${adUnitPath}', [...], '${phId}')`);
-    //   window.googletag.defineSlot(adUnitPath, sizes, phId).addService(googletag.pubads());
-    //   display(phId);
-    //   prebidCodes.push(phId);
-    // })
     return true;
   });
   logInfo('send request', adUnits);
@@ -138,7 +150,7 @@ function getDFPSlot(placeholder) {
 }
 
 function findDFPScript() {
-  return document.querySelector(`script[src*='${DFP_SRC_NO_PROTOCOL}']`);
+  return document.querySelector(`script[src*='${DFP_SCRIPT_NAME}']`);
 }
 
 function loadDFPScript() {

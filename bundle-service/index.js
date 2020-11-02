@@ -5,7 +5,6 @@ const url = require("url");
 const {prebidJSRoute} = require("./routes/prebid");
 const express = require('express');
 const bodyParser = require('body-parser');
-const {loaderJSRoute} = require("./routes/loader");
 /**
  *
  * @param {IncomingMessage} req
@@ -17,7 +16,6 @@ app.use( bodyParser.json() );
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/prebid.js', prebidJSRoute);
-app.use('/loader.js', loaderJSRoute);
 const server = app.listen(3000, function () {
   console.log('Listening on port %s...', server.address().port);
 });
