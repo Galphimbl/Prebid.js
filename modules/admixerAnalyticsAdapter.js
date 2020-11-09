@@ -4,8 +4,6 @@ import adapter from '../src/AnalyticsAdapter.js';
 import adaptermanager from '../src/adapterManager.js';
 import {logInfo} from '../src/utils.js';
 import {getHook} from "../src/hook";
-import {requestBidsHook} from "./userId";
-import {getGlobal} from "../src/prebidGlobal";
 import {auctionManager} from "../src/auctionManager";
 import {createTrackPixelHtml, logError} from "../src/utils";
 
