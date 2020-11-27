@@ -1,6 +1,5 @@
-const {ROOT_FOLDER} = require("../constants");
-const nodeBundle = require(`${ROOT_FOLDER}/gulpfile`);
-const {biddersMap} = require("../bidders");
+const nodeBundle = require(`../../gulpfile.js`);
+const biddersMap = __BIDDERS_MAP__;
 
 function prebidJSRoute(req, res) {
   const {ba: bidAdapters = '', aa: analyticsAdapters = '', pm: prebidModules = ''} = req.query
