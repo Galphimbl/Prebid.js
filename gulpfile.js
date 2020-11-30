@@ -1,5 +1,5 @@
 'use strict';
-var _buildServe = require('./build-serve');
+var SERVE = require('./build-serve');
 var _ = require('lodash');
 var argv = require('yargs').argv;
 var gulp = require('gulp');
@@ -362,7 +362,7 @@ gulp.task('e2e-test', gulp.series(clean, setupE2e, gulp.parallel('build-bundle-p
 gulp.task(bundleToStdout);
 gulp.task('bundle', gulpBundle.bind(null, false)); // used for just concatenating pre-built files with no build step
 
-gulp.task('build-serve-only', _buildServe)
-gulp.task('build-with-serve', gulp.series(clean, 'build-bundle-prod', 'build-serve-only'));
+gulp.task('build-serve-only', gulp.series(SERVE.clean, SERVE.copyCore, SERVE.build))
+gulp.task('build-with-serve', gulp.series('build', 'build-serve-only'));
 
 module.exports = nodeBundle;

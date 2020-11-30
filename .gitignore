@@ -1,6 +1,7 @@
 # Built Files
 node_modules/
 build
+build-with-serve
 
 # Test Files
 test/app
