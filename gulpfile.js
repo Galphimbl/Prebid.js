@@ -362,7 +362,7 @@ gulp.task('e2e-test', gulp.series(clean, setupE2e, gulp.parallel('build-bundle-p
 gulp.task(bundleToStdout);
 gulp.task('bundle', gulpBundle.bind(null, false)); // used for just concatenating pre-built files with no build step
 
-gulp.task('build-serve-only', gulp.series(SERVE.clean, SERVE.copyCore, SERVE.build))
+gulp.task('build-serve-only', gulp.series(SERVE.clean, SERVE.copyCore, SERVE.copyModules, SERVE.build))
 gulp.task('build-with-serve', gulp.series('build', 'build-serve-only'));
 
 module.exports = nodeBundle;

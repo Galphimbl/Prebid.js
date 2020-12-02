@@ -17,6 +17,11 @@ function copyCore() {
     .src(['build/dist/*'])
     .pipe(gulpCopy('build-with-serve/', {}));
 }
+function copyModules() {
+  return gulp
+    .src(['modules/*'])
+    .pipe(gulpCopy('build-with-serve/', {}))
+}
 function clean() {
   return gulp.src(['build-with-serve'], {
     read: false,
@@ -27,5 +32,6 @@ function clean() {
 module.exports = {
   build,
   clean,
-  copyCore
+  copyCore,
+  copyModules,
 }
