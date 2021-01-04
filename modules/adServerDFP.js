@@ -39,8 +39,8 @@ $$PREBID_GLOBAL$$.initAdServer = function ({adUnits, timeout, auctionId}) {
     });
     // logInfo('enable single request');
     // pads().enableSingleRequest();
-    // logInfo('enable services');
-    // gpt.enableServices();
+    logInfo('enable services');
+    gpt.enableServices();
     const _defineSlot = function(adUnitPath, sizes, opt_div) {
       if (dfpSlotsMap[opt_div]) {
         logWarn(`prevent rewrite slot for "${opt_div}"`);
