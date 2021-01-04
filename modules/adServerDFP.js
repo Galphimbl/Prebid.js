@@ -65,7 +65,7 @@ $$PREBID_GLOBAL$$.initAdServer = function ({adUnits, timeout, auctionId}) {
 
     function requestSlot(opt_div) {
       const dfpSlot = getDFPSlot(opt_div);
-      if (dfpSlot && requestedSlots.indexOf(opt_div) === -1) {
+      if (dfpSlot && requestedSlots.indexOf(opt_div) === -1 && isInitialLoadDisabled()) {
         pads().refresh([dfpSlot]);
       }
     }
