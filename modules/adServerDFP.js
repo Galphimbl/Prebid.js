@@ -37,10 +37,10 @@ $$PREBID_GLOBAL$$.initAdServer = function ({adUnits, timeout, auctionId}) {
       var slot = event.slot;
       requestedSlots.push(slot.getSlotElementId());
     });
-    logInfo('enable single request');
-    pads().enableSingleRequest();
-    logInfo('enable services');
-    gpt.enableServices();
+    // logInfo('enable single request');
+    // pads().enableSingleRequest();
+    // logInfo('enable services');
+    // gpt.enableServices();
     const _defineSlot = function(adUnitPath, sizes, opt_div) {
       if (dfpSlotsMap[opt_div]) {
         logWarn(`prevent rewrite slot for "${opt_div}"`);
@@ -51,17 +51,17 @@ $$PREBID_GLOBAL$$.initAdServer = function ({adUnits, timeout, auctionId}) {
       return oGptDefineSlot(adUnitPath, sizes, opt_div);
     };
     const _display = function(opt_div) {
-      requestSlot(opt_div);
+      // requestSlot(opt_div);
       return oGptDisplay(opt_div);
     };
     Object.defineProperty(gpt, 'defineSlot', {
       get: function() {return _defineSlot; },
       set: function() {},
     });
-    Object.defineProperty(gpt, 'display', {
-      get: function(){ return _display; },
-      set: function() {}
-    });
+    // Object.defineProperty(gpt, 'display', {
+    //   get: function(){ return _display; },
+    //   set: function() {}
+    // });
 
     function requestSlot(opt_div) {
       const dfpSlot = getDFPSlot(opt_div);
