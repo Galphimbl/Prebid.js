@@ -106,8 +106,6 @@ $$PREBID_GLOBAL$$.initAdServer = function ({adUnits, timeout, auctionId}) {
     });
   }
   function sendAdserverRequest() {
-    if ($$PREBID_GLOBAL$$.adserverRequestSent) return;
-    $$PREBID_GLOBAL$$.adserverRequestSent = true;
     window.googletag.cmd.push(function () {
       $$PREBID_GLOBAL$$.que.push(function () {
         Object.values(dfpSlotsMap).forEach((dfpSlotConfig) => {
